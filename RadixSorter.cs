@@ -8,8 +8,9 @@ namespace ParallelRadixSort;
 
 /// <summary>
 /// <para>
-/// 3-Way MSD Radix Sort implementation that utilizes a quicksort with 3 partitioned sections.
-/// The MSD (Most Signification Digit) algorithm starts with the most significant digit (the left-most digit) and works its way to the less significant digits.
+/// MSD Radix Sort implementation that utilizes 3-Way quicksort.
+/// The MSD (Most Significant Digit) algorithm starts with the most significant digit (the left-most digit) and works its way to the less significant digits.
+/// As data is partitioned, the data is split into items: less than, equal to, and greater than the pivot.
 /// </para>
 /// </summary>
 /// <remarks>
@@ -51,7 +52,7 @@ public class RadixSorter
     }
 
     /// <summary>
-    /// Three way quicksort partitioning of the data into 3 sections: less than, equal, greater than the pivot
+    /// Three way quicksort partitioning of the data into 3 sections: less than, equal, and greater than the pivot
     /// </summary>
     private (int minEqualBoundary, int maxEqualBoundary) Partition(Span<string> span, int depth, char pivot)
     {
@@ -82,7 +83,7 @@ public class RadixSorter
     /// <summary>
     /// The median value of the span is selected as the pivot
     /// </summary>
-    private char GetPivot(Span<string> span, int depth)
+    private char GetPivot(ReadOnlySpan<string> span, int depth)
     {
         var medianIndex = (span.Length - 1) / 2;
         return span[medianIndex][depth];

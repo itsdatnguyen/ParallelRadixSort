@@ -10,7 +10,7 @@ namespace ParallelRadixSort
 
             Console.WriteLine($"Running sorting for {filePath}: {File.ReadAllLines(filePath).Length} names)");
             RunDefaultSequentialSorting(filePath);
-            RunSequentialHeapSort(filePath);
+            RunSequentialRadixSort(filePath);
             Console.WriteLine();
 
             // additionally, I have provided more test data for running sorting on 
@@ -18,15 +18,14 @@ namespace ParallelRadixSort
             filePath = "./last-names.txt";
             Console.WriteLine($"Running sorting for {filePath}: {File.ReadAllLines(filePath).Length} names)");
             RunDefaultSequentialSorting(filePath);
-            RunSequentialHeapSort(filePath);
+            RunSequentialRadixSort(filePath);
             Console.WriteLine();
 
             filePath = "./last-names-duplicated.txt";
             Console.WriteLine($"Running sorting for {filePath}: {File.ReadAllLines(filePath).Length} names)");
             RunDefaultSequentialSorting(filePath);
-            RunSequentialHeapSort(filePath);
+            RunSequentialRadixSort(filePath);
             Console.WriteLine();
-
 
             Console.ReadLine();
         }
@@ -36,7 +35,7 @@ namespace ParallelRadixSort
             NameSort.Program.RunSorting(filePath);
         }
 
-        private static void RunSequentialHeapSort(string filePath)
+        private static void RunSequentialRadixSort(string filePath)
         {
             var files = File.ReadAllLines(filePath);
             var stringComparer = StringComparer.OrdinalIgnoreCase;
@@ -54,10 +53,6 @@ namespace ParallelRadixSort
 
             Directory.CreateDirectory("./outputseq/");
             File.WriteAllText("./outputseq/" + filePath, string.Join(Environment.NewLine, string.Join(Environment.NewLine, data)));
-            //foreach (var data in sortedData.GetList)
-            //{
-            //    Console.WriteLine(data);
-            //}
         }
 
     }
