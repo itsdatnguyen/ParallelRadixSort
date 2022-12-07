@@ -49,7 +49,7 @@ public class ParallelArrayRadixSorter : IDisposable
 
     public void PerformSort(string[] array, int startIndex, int endIndex, int depth)
     {
-        if (endIndex - startIndex < 2 || depth >= _maxStringLength)
+        if (endIndex - startIndex < 1 || depth >= _maxStringLength)
         {
             return;
         }

@@ -24,64 +24,88 @@ namespace ParallelRadixSort
 
         private static void RunDefaultSequentialSorting(string filePath)
         {
-            NameSort.Program.RunSorting(filePath);
+            var data = NameSort.Program.RunSorting(filePath);
+
+            Directory.CreateDirectory("./outputnormal/");
+            File.WriteAllText("./outputnormal/" + filePath, string.Join(Environment.NewLine, string.Join(Environment.NewLine, data)));
         }
 
         private static void RunSequentialSpanRadixSort(string filePath)
         {
-            var files = File.ReadAllLines(filePath);
-            var longestNameLength = files.Max(f => f.Length);
+            var lines = File.ReadAllLines(filePath);
+            var longestNameLength = lines.Max(f => f.Length);
             var radixSorter = new SequentialSpanRadixSorter(longestNameLength);
+            SwapLastAndFirstNames(lines);
 
-            for (var i = 0; i < files.Length; i++)
+            for (var i = 0; i < lines.Length; i++)
             {
-                files[i] = files[i].PadRight(longestNameLength);
+                lines[i] = lines[i].PadRight(longestNameLength);
             }
 
             var stopwatch = Stopwatch.StartNew();
-            var data = radixSorter.Sort(files);
+            var data = radixSorter.Sort(lines);
             Console.WriteLine($"Sequential Span Radix Elapsed Time: {stopwatch.ElapsedMilliseconds}ms");
 
+            SwapLastAndFirstNames(lines);
             Directory.CreateDirectory("./outputspan/");
             File.WriteAllText("./outputspan/" + filePath, string.Join(Environment.NewLine, string.Join(Environment.NewLine, data)));
         }
 
         private static void RunSequentialArrayRadixSort(string filePath)
         {
-            var files = File.ReadAllLines(filePath);
-            var longestNameLength = files.Max(f => f.Length);
+            var lines = File.ReadAllLines(filePath);
+            var longestNameLength = lines.Max(f => f.Length);
             var radixSorter = new SequentialArrayRadixSorter(longestNameLength);
+            SwapLastAndFirstNames(lines);
 
-            for (var i = 0; i < files.Length; i++)
+            for (var i = 0; i < lines.Length; i++)
             {
-                files[i] = files[i].PadRight(longestNameLength);
+                lines[i] = lines[i].PadRight(longestNameLength);
             }
 
             var stopwatch = Stopwatch.StartNew();
-            var data = radixSorter.Sort(files);
+            var data = radixSorter.Sort(lines);
             Console.WriteLine($"Sequential Array Radix Elapsed Time: {stopwatch.ElapsedMilliseconds}ms");
 
+            SwapLastAndFirstNames(lines);
             Directory.CreateDirectory("./outputarray/");
             File.WriteAllText("./outputarray/" + filePath, string.Join(Environment.NewLine, string.Join(Environment.NewLine, data)));
         }
 
         private static void RunParallelArrayRadixSort(string filePath)
         {
-            var files = File.ReadAllLines(filePath);
-            var longestNameLength = files.Max(f => f.Length);
+            var lines = File.ReadAllLines(filePath);
+            var longestNameLength = lines.Max(f => f.Length);
             var radixSorter = new ParallelArrayRadixSorter(longestNameLength);
+            SwapLastAndFirstNames(lines);
 
-            for (var i = 0; i < files.Length; i++)
+            for (var i = 0; i < lines.Length; i++)
             {
-                files[i] = files[i].PadRight(longestNameLength);
+                lines[i] = lines[i].PadRight(longestNameLength);
             }
 
             var stopwatch = Stopwatch.StartNew();
-            var data = radixSorter.Sort(files);
+            var data = radixSorter.Sort(lines);
             Console.WriteLine($"Parallel Array Radix Elapsed Time: {stopwatch.ElapsedMilliseconds}ms");
 
+            SwapLastAndFirstNames(lines);
             Directory.CreateDirectory("./outputparallel/");
             File.WriteAllText("./outputparallel/" + filePath, string.Join(Environment.NewLine, string.Join(Environment.NewLine, data)));
+        }
+
+        /// <summary>
+        /// Swap last and first names for ease of use by sorting by last name
+        /// </summary>
+        private static void SwapLastAndFirstNames(string[] array)
+        {
+            if (array[0].Trim().Split(' ').Length > 1)
+            {
+                for (var i = 0; i < array.Length; i++)
+                {
+                    var names = array[i].Trim().Split(" ");
+                    array[i] = names[1] + " " + names[0];
+                }
+            }
         }
     }
 }

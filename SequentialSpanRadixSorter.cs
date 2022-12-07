@@ -33,7 +33,7 @@ public class SequentialSpanRadixSorter
 
     public void PerformSort(Span<string> span, int depth)
     {
-        if (span.Length < 2 || depth >= _maxStringLength)
+        if (span.Length < 1 || depth >= _maxStringLength)
         {
             return;
         }
@@ -59,7 +59,7 @@ public class SequentialSpanRadixSorter
         int min = 0, max = span.Length - 1, i = 0;
 
         while (i <= max)
-        {
+        {           
             if (span[i][depth] < pivot)
             {
                 Swap(span, i, min);

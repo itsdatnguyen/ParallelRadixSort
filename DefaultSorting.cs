@@ -19,7 +19,7 @@ namespace NameSort
 
     public class Program
     {
-        public static void RunSorting(string filePath)
+        public static IEnumerable<string> RunSorting(string filePath)
         {
             List<name> Names = new List<name>();
             // populate the list of names from a file
@@ -43,6 +43,8 @@ namespace NameSort
             List<name> sortedNames = Names.OrderBy(s => s.lastName).ThenBy(s => s.firstName).ToList();
             stopwatch.Stop();
             Console.WriteLine($"Default LINQ Sort Elapsed Time: {stopwatch.ElapsedMilliseconds}ms");
+
+            return sortedNames.Select(n => n.firstName + " " + n?.lastName);
         }
     }
 }
