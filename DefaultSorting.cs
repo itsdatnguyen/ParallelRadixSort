@@ -42,7 +42,7 @@ namespace NameSort
             Stopwatch stopwatch = Stopwatch.StartNew();
             List<name> sortedNames = Names.OrderBy(s => s.lastName).ThenBy(s => s.firstName).ToList();
             stopwatch.Stop();
-            Console.WriteLine($"Default LINQ Sort Elapsed Time: {stopwatch.ElapsedMilliseconds}ms");
+            Console.WriteLine($"Default LINQ Sort Elapsed Time: {stopwatch.ElapsedMilliseconds}ms | {stopwatch.ElapsedTicks} ticks");
 
             return sortedNames.Select(n => n.firstName + " " + n?.lastName);
         }

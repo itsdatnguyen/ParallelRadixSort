@@ -19,17 +19,19 @@ namespace ParallelRadixSort;
 public class ParallelArrayRadixSorter : IDisposable
 {
     private readonly int _maxStringLength;
+    private readonly int _threadTreeDepth;
     private CountdownEvent _countdown;
 
-    public ParallelArrayRadixSorter(int maxStringLength)
+    public ParallelArrayRadixSorter(int maxStringLength, int threadTreeDepth)
     {
         _maxStringLength = maxStringLength;
+        _threadTreeDepth = threadTreeDepth;
         _countdown = new CountdownEvent(1);
     }
 
     public string[] Sort(string[] array)
     {
-        PerformSort(array, 0, array.Length - 1, 0);
+        PerformSort(array, 0, array.Length - 1, 0, 1);
 
         // block until all threads are done
         _countdown.Signal();
@@ -43,36 +45,37 @@ public class ParallelArrayRadixSorter : IDisposable
     public void PerformSort(object data)
     {
         var sortData = data as SortState;
-        PerformSort(sortData.Array, sortData.StartIndex, sortData.EndIndex, sortData.Depth);
+        PerformSort(sortData.Array, sortData.StartIndex, sortData.EndIndex, sortData.Depth, sortData.TreeDepth);
         _countdown.Signal();
     }
 
-    public void PerformSort(string[] array, int startIndex, int endIndex, int depth)
+    public void PerformSort(string[] array, int startIndex, int endIndex, int radixDepth, int treeDepth)
     {
-        if (endIndex - startIndex < 1 || depth >= _maxStringLength)
+        if (endIndex - startIndex < 1 || radixDepth >= _maxStringLength)
         {
             return;
         }
 
-        var pivot = GetPivot(array, startIndex, endIndex, depth);
-        var (minEqualBoundary, maxEqualBoundary) = Partition(array, startIndex, endIndex, depth, pivot);
+        var pivot = GetPivot(array, startIndex, endIndex, radixDepth);
+        var (minEqualBoundary, maxEqualBoundary) = Partition(array, startIndex, endIndex, radixDepth, pivot);
 
         // three way partitioning, partition items less, equal and greater than the pivot
         // this is useful because for items where the radix is the same as the pivot, we need to go deeper in the radix to sort further
 
         // only really queue threads for first depth
-        if (depth < 2)
+        // creating your own threads is very slow, so I'm using thread pool since that seems a lot faster
+        if (treeDepth <= _threadTreeDepth)
         {
             _countdown.AddCount(3);
-            ThreadPool.QueueUserWorkItem(PerformSort, new SortState(array, startIndex, minEqualBoundary - 1, depth));
-            ThreadPool.QueueUserWorkItem(PerformSort, new SortState(array, minEqualBoundary, maxEqualBoundary, depth + 1));
-            ThreadPool.QueueUserWorkItem(PerformSort, new SortState(array, maxEqualBoundary + 1, endIndex, depth));
+            ThreadPool.QueueUserWorkItem(PerformSort, new SortState(array, startIndex, minEqualBoundary - 1, radixDepth, treeDepth + 1));
+            ThreadPool.QueueUserWorkItem(PerformSort, new SortState(array, minEqualBoundary, maxEqualBoundary, radixDepth + 1, treeDepth + 1));
+            ThreadPool.QueueUserWorkItem(PerformSort, new SortState(array, maxEqualBoundary + 1, endIndex, radixDepth, treeDepth + 1));
         }
         else
         {
-            PerformSort(array, startIndex, minEqualBoundary - 1, depth);
-            PerformSort(array, minEqualBoundary, maxEqualBoundary, depth + 1);
-            PerformSort(array, maxEqualBoundary + 1, endIndex, depth);
+            PerformSort(array, startIndex, minEqualBoundary - 1, radixDepth, treeDepth + 1);
+            PerformSort(array, minEqualBoundary, maxEqualBoundary, radixDepth + 1, treeDepth + 1);
+            PerformSort(array, maxEqualBoundary + 1, endIndex, radixDepth, treeDepth + 1);
         }
     }
 
