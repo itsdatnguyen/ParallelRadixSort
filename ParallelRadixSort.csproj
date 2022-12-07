@@ -8,6 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Update="international-names.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="last-names-duplicated.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

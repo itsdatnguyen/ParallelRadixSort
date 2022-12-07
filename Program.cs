@@ -2,32 +2,24 @@
 
 namespace ParallelRadixSort
 {
-    internal class Program
+    public class Program
     {
         static void Main(string[] args)
         {
-            var filePath = "./names.txt";
+            RunTestOn("./names.txt");
+            RunTestOn("./last-names.txt");
+            RunTestOn("./last-names-duplicated.txt");
+            RunTestOn("./international-names.txt");
+        }
 
+        private static void RunTestOn(string filePath)
+        {
             Console.WriteLine($"Running sorting for {filePath}: {File.ReadAllLines(filePath).Length} names)");
             RunDefaultSequentialSorting(filePath);
-            RunSequentialRadixSort(filePath);
+            RunSequentialSpanRadixSort(filePath);
+            RunSequentialArrayRadixSort(filePath);
+            RunParallelArrayRadixSort(filePath);
             Console.WriteLine();
-
-            // additionally, I have provided more test data for running sorting on 
-
-            filePath = "./last-names.txt";
-            Console.WriteLine($"Running sorting for {filePath}: {File.ReadAllLines(filePath).Length} names)");
-            RunDefaultSequentialSorting(filePath);
-            RunSequentialRadixSort(filePath);
-            Console.WriteLine();
-
-            filePath = "./last-names-duplicated.txt";
-            Console.WriteLine($"Running sorting for {filePath}: {File.ReadAllLines(filePath).Length} names)");
-            RunDefaultSequentialSorting(filePath);
-            RunSequentialRadixSort(filePath);
-            Console.WriteLine();
-
-            Console.ReadLine();
         }
 
         private static void RunDefaultSequentialSorting(string filePath)
@@ -35,13 +27,12 @@ namespace ParallelRadixSort
             NameSort.Program.RunSorting(filePath);
         }
 
-        private static void RunSequentialRadixSort(string filePath)
+        private static void RunSequentialSpanRadixSort(string filePath)
         {
             var files = File.ReadAllLines(filePath);
-            var stringComparer = StringComparer.OrdinalIgnoreCase;
-
             var longestNameLength = files.Max(f => f.Length);
-            var radixSorter = new RadixSorter(longestNameLength);
+            var radixSorter = new SequentialSpanRadixSorter(longestNameLength);
+
             for (var i = 0; i < files.Length; i++)
             {
                 files[i] = files[i].PadRight(longestNameLength);
@@ -49,11 +40,48 @@ namespace ParallelRadixSort
 
             var stopwatch = Stopwatch.StartNew();
             var data = radixSorter.Sort(files);
-            Console.WriteLine($"Sequential Radix Elapsed Time: {stopwatch.ElapsedMilliseconds}ms");
+            Console.WriteLine($"Sequential Span Radix Elapsed Time: {stopwatch.ElapsedMilliseconds}ms");
 
-            Directory.CreateDirectory("./outputseq/");
-            File.WriteAllText("./outputseq/" + filePath, string.Join(Environment.NewLine, string.Join(Environment.NewLine, data)));
+            Directory.CreateDirectory("./outputspan/");
+            File.WriteAllText("./outputspan/" + filePath, string.Join(Environment.NewLine, string.Join(Environment.NewLine, data)));
         }
 
+        private static void RunSequentialArrayRadixSort(string filePath)
+        {
+            var files = File.ReadAllLines(filePath);
+            var longestNameLength = files.Max(f => f.Length);
+            var radixSorter = new SequentialArrayRadixSorter(longestNameLength);
+
+            for (var i = 0; i < files.Length; i++)
+            {
+                files[i] = files[i].PadRight(longestNameLength);
+            }
+
+            var stopwatch = Stopwatch.StartNew();
+            var data = radixSorter.Sort(files);
+            Console.WriteLine($"Sequential Array Radix Elapsed Time: {stopwatch.ElapsedMilliseconds}ms");
+
+            Directory.CreateDirectory("./outputarray/");
+            File.WriteAllText("./outputarray/" + filePath, string.Join(Environment.NewLine, string.Join(Environment.NewLine, data)));
+        }
+
+        private static void RunParallelArrayRadixSort(string filePath)
+        {
+            var files = File.ReadAllLines(filePath);
+            var longestNameLength = files.Max(f => f.Length);
+            var radixSorter = new ParallelArrayRadixSorter(longestNameLength);
+
+            for (var i = 0; i < files.Length; i++)
+            {
+                files[i] = files[i].PadRight(longestNameLength);
+            }
+
+            var stopwatch = Stopwatch.StartNew();
+            var data = radixSorter.Sort(files);
+            Console.WriteLine($"Parallel Array Radix Elapsed Time: {stopwatch.ElapsedMilliseconds}ms");
+
+            Directory.CreateDirectory("./outputparallel/");
+            File.WriteAllText("./outputparallel/" + filePath, string.Join(Environment.NewLine, string.Join(Environment.NewLine, data)));
+        }
     }
 }

@@ -16,11 +16,11 @@ namespace ParallelRadixSort;
 /// <remarks>
 /// Class heavily utilizes <see cref="Span{T}"/> which greatly simplifes array handling.
 /// </remarks>
-public class RadixSorter
+public class SequentialSpanRadixSorter
 {
     private readonly int _maxStringLength;
 
-    public RadixSorter(int maxStringLength)
+    public SequentialSpanRadixSorter(int maxStringLength)
     {
         _maxStringLength = maxStringLength;
     }
