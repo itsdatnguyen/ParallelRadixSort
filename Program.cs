@@ -4,6 +4,7 @@ namespace ParallelRadixSort
 {
     /// <summary>
     /// This project implements sequential and parallel sorting implementations to time sort data.
+    /// Additionally, this project will write back the sorted list into text files.
     /// There are 3 implementations of sorting:
     /// 
     /// <see cref="SequentialSpanRadixSorter"/> was the first implementation that I wrote that uses <see cref="Span{T}"/>
@@ -12,7 +13,12 @@ namespace ParallelRadixSort
     /// <see cref="SequentialArrayRadixSorter"/> was the second implementation that uses a normal array. As you can see by the results, it is noticably faster.
     /// 
     /// <see cref="ParallelArrayRadixSorter"/> was my parallel implementation that uses a ThreadPool behind the scenes to run threads. 
-    /// This can be around 4X faster, but it appears to run slow the first time it's run. I assume that's due to some initial overhead with the ThreadPool.
+    /// This can be around 4X faster, but it appears to run slow the first time it's run. 
+    /// I assume that's due to some initial overhead with warming up the ThreadPool. 
+    /// In my tests, I run each dataset twice so you can see that this parallel sort is only slower for the first run.
+    /// Otherwise it beats every other algorithm afterward.
+    /// With this class, I'm running the recursive <see cref="ParallelArrayRadixSorter.PerformSortForThread(object)"/>  function in a thread 
+    /// if the current tree depth is under a certain number. I've given it a number of 8 since that seems the most effective.
     /// </summary>
     /// 
     /// <remarks>
@@ -21,6 +27,7 @@ namespace ParallelRadixSort
     /// 
     /// After that, I researched radix sort, including LSD and MSD radix sort. 
     /// The idea of a quicksort tree-based algorithm sounded like a practical idea to parallelize, so that's the main focus for this project.
+    /// Overall, I'm pretty happy with the performance. MSD radix sort is very fast as is, and making it parallel seems to be great for large datasets.
     /// </remarks>
     public class Program
     {
@@ -90,6 +97,7 @@ namespace ParallelRadixSort
             RunTestOn("./last-names-duplicated.txt");
             RunTestOn("./international-names.txt");
             RunTestOn("./international-names.txt");
+            Console.ReadLine();
         }
 
         private static void RunTestOn(string filePath)
