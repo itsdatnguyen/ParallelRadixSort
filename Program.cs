@@ -2,68 +2,86 @@
 
 namespace ParallelRadixSort
 {
+    /// <summary>
+    /// This project implements sequential and parallel sorting implementations to time sort data.
+    /// There are 3 implementations of sorting:
+    /// 
+    /// <see cref="SequentialSpanRadixSorter"/> was the first implementation that I wrote that uses <see cref="Span{T}"/>
+    /// I didn't really know it at the time, but it seems like using Span is a bit slower than a normal array
+    /// 
+    /// <see cref="SequentialArrayRadixSorter"/> was the second implementation that uses a normal array. As you can see by the results, it is noticably faster.
+    /// 
+    /// <see cref="ParallelArrayRadixSorter"/> was my parallel implementation that uses a ThreadPool behind the scenes to run threads. 
+    /// This can be around 4X faster, but it appears to run slow the first time it's run. I assume that's due to some initial overhead with the ThreadPool.
+    /// </summary>
+    /// 
+    /// <remarks>
+    /// I originally tried tackling this project by doing parallel heapsort by running multiple heapsorts on sections of an array...
+    /// but there is still the issue of how to recombine the data. Overall, the performance was terrible and I had to scrap that idea.
+    /// 
+    /// After that, I researched radix sort, including LSD and MSD radix sort. 
+    /// The idea of a quicksort tree-based algorithm sounded like a practical idea to parallelize, so that's the main focus for this project.
+    /// </remarks>
     public class Program
     {
-        /// <summary>
-        /// This project contains 3 implementations of sortings
-        /// </summary>
-        /// 
         /// <example>
         /// Sample generated output:
         /// Ran on a computer with a Ryzen 5800X3D
         /// 
         /// Running sorting for ./names.txt: 10000 names)
-        /// Default LINQ Sort Elapsed Time: 18ms | 183196 ticks
-        /// Sequential Span Radix Elapsed Time: 13ms | 130819 ticks
-        /// Sequential Array Radix Elapsed Time: 3ms | 39259 ticks
-        /// Parallel Array Radix Elapsed Time: 23ms | 239624 ticks
+        /// Default LINQ Sort Elapsed Time: 19ms | 190598 ticks
+        /// Sequential Span Radix Elapsed Time: 12ms | 125059 ticks
+        /// Sequential Array Radix Elapsed Time: 2ms | 25533 ticks
+        /// Parallel Array Radix Elapsed Time: 30ms | 305147 ticks
         /// 
         /// Running sorting for ./names.txt: 10000 names)
-        /// Default LINQ Sort Elapsed Time: 8ms | 86918 ticks
-        /// Sequential Span Radix Elapsed Time: 11ms | 117960 ticks
-        /// Sequential Array Radix Elapsed Time: 2ms | 22573 ticks
-        /// Parallel Array Radix Elapsed Time: 1ms | 19772 ticks
+        /// Default LINQ Sort Elapsed Time: 13ms | 133831 ticks
+        /// Sequential Span Radix Elapsed Time: 11ms | 117640 ticks
+        /// Sequential Array Radix Elapsed Time: 2ms | 22795 ticks
+        /// Parallel Array Radix Elapsed Time: 0ms | 6338 ticks
         /// 
         /// Running sorting for ./last-names.txt: 88799 names)
-        /// Default LINQ Sort Elapsed Time: 147ms | 1472124 ticks
-        /// Sequential Span Radix Elapsed Time: 76ms | 762798 ticks
-        /// Sequential Array Radix Elapsed Time: 19ms | 194986 ticks
-        /// Parallel Array Radix Elapsed Time: 5ms | 51003 ticks
+        /// Default LINQ Sort Elapsed Time: 153ms | 1535361 ticks
+        /// Sequential Span Radix Elapsed Time: 80ms | 801429 ticks
+        /// Sequential Array Radix Elapsed Time: 21ms | 214732 ticks
+        /// Parallel Array Radix Elapsed Time: 5ms | 56095 ticks
         /// 
         /// Running sorting for ./last-names.txt: 88799 names)
-        /// Default LINQ Sort Elapsed Time: 148ms | 1488598 ticks
-        /// Sequential Span Radix Elapsed Time: 76ms | 762126 ticks
-        /// Sequential Array Radix Elapsed Time: 18ms | 188101 ticks
-        /// Parallel Array Radix Elapsed Time: 4ms | 48538 ticks
+        /// Default LINQ Sort Elapsed Time: 158ms | 1589730 ticks
+        /// Sequential Span Radix Elapsed Time: 74ms | 742404 ticks
+        /// Sequential Array Radix Elapsed Time: 19ms | 196879 ticks
+        /// Parallel Array Radix Elapsed Time: 5ms | 50898 ticks
         /// 
         /// Running sorting for ./last-names-duplicated.txt: 887990 names)
-        /// Default LINQ Sort Elapsed Time: 1716ms | 17168225 ticks
-        /// Sequential Span Radix Elapsed Time: 350ms | 3509172 ticks
-        /// Sequential Array Radix Elapsed Time: 228ms | 2289632 ticks
-        /// Parallel Array Radix Elapsed Time: 55ms | 554862 ticks
+        /// Default LINQ Sort Elapsed Time: 1687ms | 16879867 ticks
+        /// Sequential Span Radix Elapsed Time: 356ms | 3564332 ticks
+        /// Sequential Array Radix Elapsed Time: 226ms | 2266956 ticks
+        /// Parallel Array Radix Elapsed Time: 52ms | 528030 ticks
         /// 
         /// Running sorting for ./last-names-duplicated.txt: 887990 names)
-        /// Default LINQ Sort Elapsed Time: 1692ms | 16928478 ticks
-        /// Sequential Span Radix Elapsed Time: 342ms | 3424093 ticks
-        /// Sequential Array Radix Elapsed Time: 230ms | 2305974 ticks
-        /// Parallel Array Radix Elapsed Time: 52ms | 522922 ticks
+        /// Default LINQ Sort Elapsed Time: 1661ms | 16613146 ticks
+        /// Sequential Span Radix Elapsed Time: 345ms | 3453274 ticks
+        /// Sequential Array Radix Elapsed Time: 229ms | 2291630 ticks
+        /// Parallel Array Radix Elapsed Time: 53ms | 534017 ticks
         /// 
         /// Running sorting for ./international-names.txt: 19948 names)
-        /// Default LINQ Sort Elapsed Time: 25ms | 254314 ticks
-        /// Sequential Span Radix Elapsed Time: 18ms | 189775 ticks
-        /// Sequential Array Radix Elapsed Time: 4ms | 45985 ticks
-        /// Parallel Array Radix Elapsed Time: 1ms | 17601 ticks
+        /// Default LINQ Sort Elapsed Time: 25ms | 254073 ticks
+        /// Sequential Span Radix Elapsed Time: 19ms | 191314 ticks
+        /// Sequential Array Radix Elapsed Time: 4ms | 49259 ticks
+        /// Parallel Array Radix Elapsed Time: 1ms | 18206 ticks
         /// 
         /// Running sorting for ./international-names.txt: 19948 names)
-        /// Default LINQ Sort Elapsed Time: 25ms | 257972 ticks
-        /// Sequential Span Radix Elapsed Time: 18ms | 188949 ticks
-        /// Sequential Array Radix Elapsed Time: 4ms | 45708 ticks
-        /// Parallel Array Radix Elapsed Time: 1ms | 18158 ticks
+        /// Default LINQ Sort Elapsed Time: 25ms | 257052 ticks
+        /// Sequential Span Radix Elapsed Time: 18ms | 189034 ticks
+        /// Sequential Array Radix Elapsed Time: 4ms | 45182 ticks
+        /// Parallel Array Radix Elapsed Time: 1ms | 16821 ticks
         /// </example>
         static void Main(string[] args)
         {
             // running the tests twice on each dataset because it seems like the parallel implementation is always a bit slower on the first run
             // probably the thread pool needs to warm up somehow
+
+            // I've additionally provided more files to run sorting on
             RunTestOn("./names.txt");
             RunTestOn("./names.txt");
             RunTestOn("./last-names.txt");
@@ -77,14 +95,14 @@ namespace ParallelRadixSort
         private static void RunTestOn(string filePath)
         {
             Console.WriteLine($"Running sorting for {filePath}: {File.ReadAllLines(filePath).Length} names)");
-            RunDefaultSequentialSorting(filePath);
+            RunDefaultSequentialLinqSorting(filePath);
             RunSequentialSpanRadixSort(filePath);
             RunSequentialArrayRadixSort(filePath);
             RunParallelArrayRadixSort(filePath);
             Console.WriteLine();
         }
 
-        private static void RunDefaultSequentialSorting(string filePath)
+        private static void RunDefaultSequentialLinqSorting(string filePath)
         {
             var data = NameSort.Program.RunSorting(filePath);
 
@@ -130,6 +148,8 @@ namespace ParallelRadixSort
         {
             var lines = File.ReadAllLines(filePath);
             var longestNameLength = lines.Max(f => f.Length);
+
+            // 8 seems like the most effective number to use for performance
             var radixSorter = new ParallelArrayRadixSorter(longestNameLength, 8);
             SwapLastAndFirstNames(lines);
             PadDataToSameLength(lines, longestNameLength);

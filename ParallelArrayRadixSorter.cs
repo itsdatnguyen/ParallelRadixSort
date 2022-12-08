@@ -12,20 +12,20 @@ namespace ParallelRadixSort;
 /// The MSD (Most Significant Digit) algorithm starts with the most significant digit (the left-most digit) and works its way to the less significant digits.
 /// As data is partitioned, the data is split into items: less than, equal to, and greater than the pivot.
 /// </para>
-/// <para>
-/// Interestingly, this class is faster than <see cref="SequentialSpanRadixSorter"/>. I assume there is more overhead with using <see cref="Span{T}"/>
-/// </para>
 /// </summary>
 public class ParallelArrayRadixSorter : IDisposable
 {
     private readonly int _maxStringLength;
-    private readonly int _threadTreeDepth;
+    private readonly int _maxThreadRunTreeDepth;
+    /// <summary>
+    /// This is used to determine when all threads are finished work.
+    /// </summary>
     private CountdownEvent _countdown;
 
-    public ParallelArrayRadixSorter(int maxStringLength, int threadTreeDepth)
+    public ParallelArrayRadixSorter(int maxStringLength, int maxThreadRunTreeDepth)
     {
         _maxStringLength = maxStringLength;
-        _threadTreeDepth = threadTreeDepth;
+        _maxThreadRunTreeDepth = maxThreadRunTreeDepth;
         _countdown = new CountdownEvent(1);
     }
 
@@ -42,7 +42,7 @@ public class ParallelArrayRadixSorter : IDisposable
     /// <summary>
     /// Entry point for threads 
     /// </summary>
-    public void PerformSort(object data)
+    public void PerformSortForThread(object data)
     {
         var sortData = data as SortState;
         PerformSort(sortData.Array, sortData.StartIndex, sortData.EndIndex, sortData.Depth, sortData.TreeDepth);
@@ -59,17 +59,14 @@ public class ParallelArrayRadixSorter : IDisposable
         var pivot = GetPivot(array, startIndex, endIndex, radixDepth);
         var (minEqualBoundary, maxEqualBoundary) = Partition(array, startIndex, endIndex, radixDepth, pivot);
 
-        // three way partitioning, partition items less, equal and greater than the pivot
-        // this is useful because for items where the radix is the same as the pivot, we need to go deeper in the radix to sort further
-
-        // only really queue threads for first depth
+        // queue threads based on how shallow in the tree we are 
         // creating your own threads is very slow, so I'm using thread pool since that seems a lot faster
-        if (treeDepth <= _threadTreeDepth)
+        if (treeDepth <= _maxThreadRunTreeDepth)
         {
             _countdown.AddCount(3);
-            ThreadPool.QueueUserWorkItem(PerformSort, new SortState(array, startIndex, minEqualBoundary - 1, radixDepth, treeDepth + 1));
-            ThreadPool.QueueUserWorkItem(PerformSort, new SortState(array, minEqualBoundary, maxEqualBoundary, radixDepth + 1, treeDepth + 1));
-            ThreadPool.QueueUserWorkItem(PerformSort, new SortState(array, maxEqualBoundary + 1, endIndex, radixDepth, treeDepth + 1));
+            ThreadPool.QueueUserWorkItem(PerformSortForThread, new SortState(array, startIndex, minEqualBoundary - 1, radixDepth, treeDepth + 1));
+            ThreadPool.QueueUserWorkItem(PerformSortForThread, new SortState(array, minEqualBoundary, maxEqualBoundary, radixDepth + 1, treeDepth + 1));
+            ThreadPool.QueueUserWorkItem(PerformSortForThread, new SortState(array, maxEqualBoundary + 1, endIndex, radixDepth, treeDepth + 1));
         }
         else
         {
