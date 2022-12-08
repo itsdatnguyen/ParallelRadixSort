@@ -13,7 +13,7 @@ namespace ParallelRadixSort
     /// <see cref="SequentialArrayRadixSorter"/> was the second implementation that uses a normal array. As you can see by the results, it is noticably faster.
     /// 
     /// <see cref="ParallelArrayRadixSorter"/> was my parallel implementation that uses a ThreadPool behind the scenes to run threads. 
-    /// This can be around 4X faster, but it appears to run slow the first time it's run. 
+    /// This can be around 4X faster, but it appears to run slower the first time it's run. 
     /// I assume that's due to some initial overhead with warming up the ThreadPool. 
     /// In my tests, I run each dataset twice so you can see that this parallel sort is only slower for the first run.
     /// Otherwise it beats every other algorithm afterward.
@@ -33,56 +33,55 @@ namespace ParallelRadixSort
     {
         /// <example>
         /// Sample generated output:
-        /// Ran on a computer with a Ryzen 5800X3D
+        /// Ran the published .exe file in release mode on computer with a Ryzen 5800X3D
         /// 
         /// Running sorting for ./names.txt: 10000 names)
-        /// Default LINQ Sort Elapsed Time: 19ms | 190598 ticks
-        /// Sequential Span Radix Elapsed Time: 12ms | 125059 ticks
-        /// Sequential Array Radix Elapsed Time: 2ms | 25533 ticks
-        /// Parallel Array Radix Elapsed Time: 30ms | 305147 ticks
+        /// Default LINQ Sort Elapsed Time: 15ms | 157986 ticks
+        /// Sequential Span Radix Elapsed Time: 9ms | 90792 ticks
+        /// Sequential Array Radix Elapsed Time: 1ms | 14889 ticks
+        /// Parallel Array Radix Elapsed Time: 4ms | 40144 ticks
         /// 
         /// Running sorting for ./names.txt: 10000 names)
-        /// Default LINQ Sort Elapsed Time: 13ms | 133831 ticks
-        /// Sequential Span Radix Elapsed Time: 11ms | 117640 ticks
-        /// Sequential Array Radix Elapsed Time: 2ms | 22795 ticks
-        /// Parallel Array Radix Elapsed Time: 0ms | 6338 ticks
+        /// Default LINQ Sort Elapsed Time: 7ms | 74046 ticks
+        /// Sequential Span Radix Elapsed Time: 9ms | 90663 ticks
+        /// Sequential Array Radix Elapsed Time: 1ms | 11841 ticks
+        /// Parallel Array Radix Elapsed Time: 0ms | 4645 ticks
         /// 
         /// Running sorting for ./last-names.txt: 88799 names)
-        /// Default LINQ Sort Elapsed Time: 153ms | 1535361 ticks
-        /// Sequential Span Radix Elapsed Time: 80ms | 801429 ticks
-        /// Sequential Array Radix Elapsed Time: 21ms | 214732 ticks
-        /// Parallel Array Radix Elapsed Time: 5ms | 56095 ticks
+        /// Default LINQ Sort Elapsed Time: 84ms | 842277 ticks
+        /// Sequential Span Radix Elapsed Time: 27ms | 278048 ticks
+        /// Sequential Array Radix Elapsed Time: 8ms | 88984 ticks
+        /// Parallel Array Radix Elapsed Time: 3ms | 39321 ticks
         /// 
         /// Running sorting for ./last-names.txt: 88799 names)
-        /// Default LINQ Sort Elapsed Time: 158ms | 1589730 ticks
-        /// Sequential Span Radix Elapsed Time: 74ms | 742404 ticks
-        /// Sequential Array Radix Elapsed Time: 19ms | 196879 ticks
-        /// Parallel Array Radix Elapsed Time: 5ms | 50898 ticks
+        /// Default LINQ Sort Elapsed Time: 86ms | 862788 ticks
+        /// Sequential Span Radix Elapsed Time: 17ms | 178738 ticks
+        /// Sequential Array Radix Elapsed Time: 9ms | 94229 ticks
+        /// Parallel Array Radix Elapsed Time: 3ms | 39555 ticks
         /// 
         /// Running sorting for ./last-names-duplicated.txt: 887990 names)
-        /// Default LINQ Sort Elapsed Time: 1687ms | 16879867 ticks
-        /// Sequential Span Radix Elapsed Time: 356ms | 3564332 ticks
-        /// Sequential Array Radix Elapsed Time: 226ms | 2266956 ticks
-        /// Parallel Array Radix Elapsed Time: 52ms | 528030 ticks
+        /// Default LINQ Sort Elapsed Time: 945ms | 9451318 ticks
+        /// Sequential Span Radix Elapsed Time: 96ms | 969351 ticks
+        /// Sequential Array Radix Elapsed Time: 91ms | 911375 ticks
+        /// Parallel Array Radix Elapsed Time: 22ms | 224468 ticks
         /// 
         /// Running sorting for ./last-names-duplicated.txt: 887990 names)
-        /// Default LINQ Sort Elapsed Time: 1661ms | 16613146 ticks
-        /// Sequential Span Radix Elapsed Time: 345ms | 3453274 ticks
-        /// Sequential Array Radix Elapsed Time: 229ms | 2291630 ticks
-        /// Parallel Array Radix Elapsed Time: 53ms | 534017 ticks
+        /// Default LINQ Sort Elapsed Time: 951ms | 9516193 ticks
+        /// Sequential Span Radix Elapsed Time: 102ms | 1020203 ticks
+        /// Sequential Array Radix Elapsed Time: 87ms | 872642 ticks
+        /// Parallel Array Radix Elapsed Time: 23ms | 232995 ticks
         /// 
         /// Running sorting for ./international-names.txt: 19948 names)
-        /// Default LINQ Sort Elapsed Time: 25ms | 254073 ticks
-        /// Sequential Span Radix Elapsed Time: 19ms | 191314 ticks
-        /// Sequential Array Radix Elapsed Time: 4ms | 49259 ticks
-        /// Parallel Array Radix Elapsed Time: 1ms | 18206 ticks
+        /// Default LINQ Sort Elapsed Time: 14ms | 146277 ticks
+        /// Sequential Span Radix Elapsed Time: 4ms | 48655 ticks
+        /// Sequential Array Radix Elapsed Time: 2ms | 20413 ticks
+        /// Parallel Array Radix Elapsed Time: 0ms | 9762 ticks
         /// 
         /// Running sorting for ./international-names.txt: 19948 names)
-        /// Default LINQ Sort Elapsed Time: 25ms | 257052 ticks
-        /// Sequential Span Radix Elapsed Time: 18ms | 189034 ticks
-        /// Sequential Array Radix Elapsed Time: 4ms | 45182 ticks
-        /// Parallel Array Radix Elapsed Time: 1ms | 16821 ticks
-        /// </example>
+        /// Default LINQ Sort Elapsed Time: 14ms | 144155 ticks
+        /// Sequential Span Radix Elapsed Time: 4ms | 48620 ticks
+        /// Sequential Array Radix Elapsed Time: 2ms | 20414 ticks
+        /// Parallel Array Radix Elapsed Time: 0ms | 9791 ticks
         static void Main(string[] args)
         {
             // running the tests twice on each dataset because it seems like the parallel implementation is always a bit slower on the first run
